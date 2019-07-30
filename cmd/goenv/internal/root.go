@@ -11,26 +11,12 @@ func Run(args []string) error {
 	name := path.Base(args[1])
 	fullpath := "src/" + args[1]
 
-	if err := os.Mkdir(name, os.ModePerm); err != nil {
-		return err
-	}
+	c := &Command{}
 
-	if err := os.Chdir(name); err != nil {
-		return err
-	}
+	c.BuildProjectPath(name)
+	c.BuildGoPath(fullpath)
 
-	if err := os.MkdirAll(fullpath, os.ModePerm); err != nil {
-		return err
-	}
-
-	if err := os.MkdirAll("bin", os.ModePerm); err != nil {
-		return err
-	}
-
-	if err := os.MkdirAll("pkg", os.ModePerm); err != nil {
-		return err
-	}
-
+	// write the direnv config
 	cfg := &direnv.Config{
 		GoPath: true,
 		Paths: []string{
