@@ -1,8 +1,11 @@
 package internal
 
 import (
+	"bytes"
+	"io"
 	"testing"
 
+	"github.com/timraymond/goenv/direnv"
 	"github.com/timraymond/goenv/mocks"
 )
 
@@ -69,5 +72,29 @@ func Test_Command_CreateProjectPath(t *testing.T) {
 
 	if chdirPath != exp {
 		t.Error("Unexpected chdir path: got:", chdirPath, "exp:", exp)
+	}
+}
+
+func Test_Command_WriteConfig(t *testing.T) {
+	var got string
+	buf := bytes.NewBufferString("")
+
+	c := &Command{
+		Builder: &mocks.Builder{
+			OpenFileF: func(path string) (io.WriteCloser, error) {
+				got = path
+				return &mocks.WriteCloser{buf}, nil
+			},
+		},
+	}
+
+	exp := "blah"
+	err := c.WriteConfig(exp, &direnv.Config{})
+	if err != nil {
+		t.Fatal("Unexpected error: err:", err)
+	}
+
+	if exp != got {
+		t.Error("Filenames do not match. exp:", exp, "got:", got)
 	}
 }

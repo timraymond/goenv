@@ -1,11 +1,16 @@
 package internal
 
-import "path"
+import (
+	"encoding"
+	"io"
+	"path"
+)
 
 type Command struct {
 	Builder interface {
 		MkdirAll(string) error
 		Chdir(string) error
+		OpenFile(string) (io.WriteCloser, error)
 	}
 }
 
@@ -34,5 +39,21 @@ func (c *Command) BuildProjectPath(path string) error {
 	if err := c.Builder.Chdir(path); err != nil {
 		return err
 	}
+	return nil
+}
+
+func (c *Command) WriteConfig(path string, cfg encoding.TextMarshaler) error {
+	envrc, err := c.Builder.OpenFile(path)
+	if err != nil {
+		return err
+	}
+	defer envrc.Close()
+
+	conf, err := cfg.MarshalText()
+	if err != nil {
+		return err
+	}
+
+	envrc.Write(conf)
 	return nil
 }

@@ -8,7 +8,14 @@ import (
 )
 
 func main() {
-	if err := internal.Run(os.Args[1:]); err != nil {
+	cmd := &internal.Command{
+		Builder: &OSBuilder{
+			DirMode:  os.ModePerm,
+			FileMode: 0644,
+		},
+	}
+
+	if err := internal.Run(os.Args[1:], cmd); err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	}
